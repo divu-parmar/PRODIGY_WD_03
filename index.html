@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: #c8e6c9;
+      border: 2px solid #2e7d32;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .cell:hover {
+      background-color: #a5d6a7;
+    }
+    .cell.taken {
+      pointer-events: none;
+      background-color: #81c784;
+      color: #fff;
+    }
+    .menu button, .back-button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #66bb6a;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    .menu button:hover, .back-button:hover {
+      background-color: #4caf50;
+    }
+    .hidden {
+      display: none;
+    }
+    .result-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 2px solid #2e7d32;
+      border-radius: 8px;
+      background-color: #c8e6c9;
+      color: #2e7d32;
+      font-size: 20px;
+      font-weight: bold;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="menu" class="menu">
+      <h1>Tic Tac Toe</h1>
+      <button onclick="showPage('friends')">Play with Friends</button>
+      <button onclick="showPage('computer')">Play with Computer</button>
+    </div>
+
+    <div id="friendsPage" class="hidden">
+      <h2>Play with Friends</h2>
+      <div class="board" id="friendsBoard"></div>
+      <div id="friendsResult" class="result-box hidden"></div>
+      <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+
+    <div id="computerPage" class="hidden">
+      <h2>Play with Computer</h2>
+      <div class="board" id="computerBoard"></div>
+      <div id="computerResult" class="result-box hidden"></div>
+      <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+  </div>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const friendsPage = document.getElementById('friendsPage');
+    const computerPage = document.getElementById('computerPage');
+
+    function showPage(page) {
+      menu.classList.add('hidden');
+      if (page === 'friends') {
+        friendsPage.classList.remove('hidden');
+        initializeBoard('friendsBoard', false, 'friendsResult');
+      } else if (page === 'computer') {
+        computerPage.classList.remove('hidden');
+        initializeBoard('computerBoard', true, 'computerResult');
+      }
+    }
+
+    function goBack() {
+      menu.classList.remove('hidden');
+      friendsPage.classList.add('hidden');
+      computerPage.classList.add('hidden');
+    }
+
+    function initializeBoard(boardId, isComputer, resultId) {
+      const board = document.getElementById(boardId);
+      const resultBox = document.getElementById(resultId);
+      board.innerHTML = '';
+      resultBox.classList.add('hidden');
+      let currentPlayer = 'X';
+
+      const cells = Array(9).fill(null);
+
+      function showResult(message) {
+        resultBox.textContent = message;
+        resultBox.classList.remove('hidden');
+      }
+
+      function checkWinner() {
+        const winningCombinations = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8],
+          [0, 3, 6], [1, 4, 7], [2, 5, 8],
+          [0, 4, 8], [2, 4, 6]
+        ];
+
+        for (const combination of winningCombinations) {
+          const [a, b, c] = combination;
+          if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+            showResult(`${cells[a]} wins!`);
+            return true;
+          }
+        }
+
+        if (!cells.includes(null)) {
+          showResult('It\'s a draw!');
+          return true;
+        }
+        return false;
+      }
+
+      function computerMove() {
+        const emptyCells = cells.map((cell, index) => cell === null ? index : null).filter(index => index !== null);
+        const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        cells[randomIndex] = 'O';
+        board.children[randomIndex].textContent = 'O';
+        board.children[randomIndex].classList.add('taken');
+        if (!checkWinner()) {
+          currentPlayer = 'X';
+        }
+      }
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.addEventListener('click', () => {
+          if (!cells[i]) {
+            cells[i] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add('taken');
+            if (!checkWinner()) {
+              if (isComputer && currentPlayer === 'X') {
+                currentPlayer = 'O';
+                setTimeout(computerMove, 500);
+              } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+              }
+            }
+          }
+        });
+        board.appendChild(cell);
+      }
+    }
+  </script>
+</body>
+</html>
